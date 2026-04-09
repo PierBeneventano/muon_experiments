@@ -252,6 +252,22 @@ for step_marker in ['scaler.update()', 'optimizer.step()']:
         print(f"Added spectral logging after {step_marker}")
         break
 
+# --- Edit 6: Fix LR scheduling to use muon_lr for Muon optimizer ---
+# nanoGPT overrides optimizer LR every step with: lr = get_lr(iter_num) if decay_lr else learning_rate
+# This clobbers muon_lr. We need it to use muon_lr when Muon is active.
+lr_override_pattern = re.compile(
+    r'^(\s*)(lr\s*=\s*get_lr\(iter_num\)\s*if\s*decay_lr\s*else\s*learning_rate)\s*$',
+    re.MULTILINE
+)
+lr_match = lr_override_pattern.search(src)
+if lr_match:
+    indent = lr_match.group(1)
+    replacement = f"{indent}lr = muon_lr if muon_optimizer == 'muon' else (get_lr(iter_num) if decay_lr else learning_rate)  # MUON PATCH: use muon_lr for Muon"
+    src = src[:lr_match.start()] + replacement + src[lr_match.end():]
+    print("Fixed LR scheduling to use muon_lr for Muon optimizer")
+else:
+    print("WARNING: Could not find LR scheduling line")
+
 # --- Write patched file ---
 with open(TRAIN_PY, 'w') as f:
     f.write(src)
