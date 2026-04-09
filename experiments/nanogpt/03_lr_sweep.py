@@ -66,6 +66,9 @@ def run(args):
         f"--spectral_log_every=0",  # no spectral logging -- too many runs
         f"--wandb_log=False",
         f"--compile=False",
+        f"--decay_lr=False",
+        f"--gradient_accumulation_steps=1",
+        f"--warmup_iters=100",
     ]
 
     meta = {

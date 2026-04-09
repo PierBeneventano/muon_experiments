@@ -174,6 +174,7 @@ muon_lr = 0.02
 muon_momentum = 0.95
 spectral_log_every = 500        # 0 = disabled
 spectral_full_svd = False       # save full singular-value vectors
+seed = 1337                     # random seed (nanoGPT has no built-in seed config)
 
 # ============================================================================
 # END MUON PATCH
@@ -282,14 +283,18 @@ def patch_training_loop(src: str) -> str:
         return src
 
     init_snippet = textwrap.dedent('''\
-    # --- MUON PATCH: spectral logger init ---
+    # --- MUON PATCH: seed + spectral logger init ---
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+    import numpy as _np; _np.random.seed(seed)
     _spectral_logger = None
     if spectral_log_every > 0:
         _spectral_out = os.path.join(out_dir, 'spectral')
         _spectral_logger = SpectralLogger(
             _spectral_out, log_every=spectral_log_every, full_svd=spectral_full_svd
         )
-    # --- END MUON PATCH: spectral logger init ---
+    # --- END MUON PATCH: seed + spectral logger init ---
     ''')
 
     idx = src.index(marker_used)
