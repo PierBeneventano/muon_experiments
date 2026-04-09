@@ -60,7 +60,7 @@ def run(args):
         f"--log_interval=10",
         f"--eval_iters=200",
         f"--learning_rate={args.lr}",
-        f"--optimizer=muon",
+        f"--muon_optimizer=muon",
         f"--muon_lr={args.lr}",
         f"--muon_momentum={args.momentum}",
         f"--spectral_log_every=500",

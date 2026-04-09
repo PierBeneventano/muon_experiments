@@ -61,7 +61,7 @@ def run(args):
         f"--log_interval=10",
         f"--eval_iters=200",
         f"--learning_rate={args.lr}",
-        f"--optimizer={args.optimizer}",
+        f"--muon_optimizer={args.optimizer}",
         f"--muon_lr={args.lr}",
         f"--spectral_log_every=0",  # no spectral logging -- too many runs
         f"--wandb_log=False",

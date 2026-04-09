@@ -66,7 +66,7 @@ def run(args):
         f"--eval_iters=200",
         f"--learning_rate={lr}",
         f"--weight_decay={args.weight_decay}",
-        f"--optimizer={args.optimizer}",
+        f"--muon_optimizer={args.optimizer}",
         f"--muon_lr={lr}",
         f"--spectral_log_every=500",
         f"--spectral_full_svd=True",
