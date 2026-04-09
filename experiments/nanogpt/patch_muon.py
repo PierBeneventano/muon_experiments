@@ -192,7 +192,7 @@ if import_line.strip() not in src:
 # --- Edit 3: Replace optimizer creation ---
 # Find: optimizer = model.configure_optimizers(...)
 opt_pattern = re.compile(
-    r'^(\s*)(optimizer\s*=\s*model\.configure_optimizers\(.+?\))',
+    r'^(\s*)optimizer\s*=\s*model\.configure_optimizers\(.*\).*$',
     re.MULTILINE
 )
 match = opt_pattern.search(src)
