@@ -134,9 +134,10 @@ def analyze_acquisition(spectral_log_path, top_k=10):
 
 def run(args):
     lr = args.lr if args.lr is not None else default_lr(args.optimizer)
-    tag = f"{args.optimizer}_topk{args.top_k}_s{args.seed}"
-    out_dir = args.output_dir or os.path.join(
-        PROJECT_ROOT, "results", "05_feature_acquisition", tag)
+    # Build unique run directory
+    base_dir = args.output_dir or os.path.join(PROJECT_ROOT, "results", "05_feature_acquisition")
+    tag = f"{args.optimizer}_s{args.seed}"
+    out_dir = os.path.join(base_dir, tag)
     os.makedirs(out_dir, exist_ok=True)
 
     spectral_log_path = args.spectral_log

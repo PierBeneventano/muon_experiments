@@ -41,17 +41,13 @@ def default_lr(optimizer: str) -> float:
     return 0.02 if optimizer == "muon" else 1e-3
 
 
-def build_output_dir(args) -> str:
-    if args.output_dir:
-        return args.output_dir
-    tag = f"{args.optimizer}_lr{args.lr}_s{args.seed}"
-    return os.path.join(PROJECT_ROOT, "results", "01_muon_vs_adamw", tag)
-
-
 def run(args):
     lr = args.lr if args.lr is not None else default_lr(args.optimizer)
     args.lr = lr
-    out_dir = build_output_dir(args)
+    # Build unique run directory
+    base_dir = args.output_dir or os.path.join(PROJECT_ROOT, "results", "01_muon_vs_adamw")
+    tag = f"{args.optimizer}_s{args.seed}"
+    out_dir = os.path.join(base_dir, tag)
     os.makedirs(out_dir, exist_ok=True)
 
     # Model config

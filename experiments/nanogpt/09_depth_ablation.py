@@ -42,9 +42,10 @@ def default_lr(optimizer):
 
 def run(args):
     lr = args.lr if args.lr is not None else default_lr(args.optimizer)
-    tag = f"{args.optimizer}_layers{args.n_layer}_s{args.seed}"
-    out_dir = args.output_dir or os.path.join(
-        PROJECT_ROOT, "results", "09_depth_ablation", tag)
+    # Build unique run directory
+    base_dir = args.output_dir or os.path.join(PROJECT_ROOT, "results", "09_depth_ablation")
+    tag = f"{args.optimizer}_depth{args.n_layer}_s{args.seed}"
+    out_dir = os.path.join(base_dir, tag)
     os.makedirs(out_dir, exist_ok=True)
 
     n_head, n_embd, block_size = 4, 128, 256

@@ -42,9 +42,10 @@ def default_lr(optimizer):
 
 def run(args):
     lr = args.lr if args.lr is not None else default_lr(args.optimizer)
+    # Build unique run directory
+    base_dir = args.output_dir or os.path.join(PROJECT_ROOT, "results", "06_weight_decay_ablation")
     tag = f"{args.optimizer}_wd{args.weight_decay}_s{args.seed}"
-    out_dir = args.output_dir or os.path.join(
-        PROJECT_ROOT, "results", "06_weight_decay_ablation", tag)
+    out_dir = os.path.join(base_dir, tag)
     os.makedirs(out_dir, exist_ok=True)
 
     n_layer, n_head, n_embd, block_size = 4, 4, 128, 256

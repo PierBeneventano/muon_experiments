@@ -41,9 +41,10 @@ def default_lr(optimizer):
 
 def run(args):
     lr = args.lr if args.lr is not None else default_lr(args.optimizer)
-    tag = f"{args.optimizer}_every{args.log_every}_s{args.seed}"
-    out_dir = args.output_dir or os.path.join(
-        PROJECT_ROOT, "results", "04_spectral_tracking", tag)
+    # Build unique run directory
+    base_dir = args.output_dir or os.path.join(PROJECT_ROOT, "results", "04_spectral_tracking")
+    tag = f"{args.optimizer}_s{args.seed}"
+    out_dir = os.path.join(base_dir, tag)
     os.makedirs(out_dir, exist_ok=True)
 
     n_layer, n_head, n_embd, block_size = 4, 4, 128, 256

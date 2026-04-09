@@ -38,9 +38,10 @@ def parse_args():
 
 
 def run(args):
-    tag = f"{args.optimizer}_lr{args.lr}_bs{args.batch_size}_s{args.seed}"
-    out_dir = args.output_dir or os.path.join(
-        PROJECT_ROOT, "results", "03_lr_sweep", tag)
+    # Build unique run directory
+    base_dir = args.output_dir or os.path.join(PROJECT_ROOT, "results", "03_lr_sweep")
+    tag = f"{args.optimizer}_lr{args.lr}_bs{args.batch_size}"
+    out_dir = os.path.join(base_dir, tag)
     os.makedirs(out_dir, exist_ok=True)
 
     n_layer, n_head, n_embd, block_size = 4, 4, 128, 256
