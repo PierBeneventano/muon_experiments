@@ -69,7 +69,7 @@ def run(args):
         f"--optimizer={args.optimizer}",
         f"--muon_lr={lr}",
         f"--spectral_log_every=500",
-        f"--spectral_full_svd=False",
+        f"--spectral_full_svd=True",
         f"--wandb_log=False",
         f"--compile=False",
         f"--decay_lr=False",

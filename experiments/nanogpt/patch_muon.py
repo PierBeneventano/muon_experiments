@@ -94,26 +94,62 @@ class MuonOptimizer(torch.optim.Optimizer):
 # ---- Spectral logging utilities --------------------------------------------
 
 def _spectral_entropy(singular_values):
-    """Normalised spectral entropy H(s) in [0, 1]."""
+    """Unnormalised spectral entropy H(s) = -sum p_k ln p_k."""
     s = singular_values.clamp(min=1e-12)
     p = s / s.sum()
-    h = -(p * p.log()).sum().item()
-    h_max = math.log(len(s)) if len(s) > 1 else 1.0
+    return -(p * p.log()).sum().item()
+
+def _spectral_entropy_normalized(singular_values):
+    """Normalised spectral entropy H(s) / H_max in [0, 1]."""
+    h = _spectral_entropy(singular_values)
+    h_max = math.log(len(singular_values)) if len(singular_values) > 1 else 1.0
     return h / h_max if h_max > 0 else 0.0
 
-def _s_mu_metric(singular_values, mu=1.0):
-    """S(mu) = sum_i max(0, s_i - mu) / sum_i s_i."""
-    s = singular_values.clamp(min=0)
-    total = s.sum().item()
-    if total < 1e-12:
-        return 0.0
-    return (s - mu).clamp(min=0).sum().item() / total
+def _s_mu_functional(singular_values):
+    """S(mu) = sum_{i!=j} 1/(s_i + s_j)^2 — the spectral functional from the paper."""
+    s = singular_values.clamp(min=1e-12).cpu().numpy()
+    n = len(s)
+    total = 0.0
+    for i in range(n):
+        for j in range(n):
+            if i != j:
+                total += 1.0 / (s[i] + s[j])**2
+    return total
+
+def _effective_rank(singular_values):
+    """exp(H(s)) — continuous rank measure in [1, min(m,n)]."""
+    h = _spectral_entropy(singular_values)
+    return math.exp(h)
+
+def _condition_number(singular_values):
+    """sigma_1 / sigma_min."""
+    s = singular_values.clamp(min=1e-12)
+    return (s[0] / s[-1]).item()
+
+def _stable_rank(singular_values):
+    """||W||_F^2 / ||W||_op^2 = sum(s^2) / s_1^2."""
+    s = singular_values.clamp(min=1e-12)
+    return ((s**2).sum() / s[0]**2).item()
+
+def _nuclear_to_frobenius(singular_values):
+    """||W||_* / ||W||_F = sum(s) / sqrt(sum(s^2))."""
+    s = singular_values.clamp(min=1e-12)
+    return (s.sum() / (s**2).sum().sqrt()).item()
+
+def _gini_coefficient(singular_values):
+    """Gini coefficient of singular values — measures spectral inequality."""
+    s = singular_values.clamp(min=1e-12).cpu().numpy()
+    s = np.sort(s)
+    n = len(s)
+    idx = np.arange(1, n + 1)
+    return (2.0 * (idx * s).sum() / (n * s.sum()) - (n + 1) / n)
+
+import numpy as np  # for gini
 
 def compute_spectral_metrics(model, full_svd=False):
     """
-    Compute spectral metrics for every 2-D parameter in the model.
-    If full_svd=True, also return the raw singular-value vectors.
-    Returns a list of dicts, one per weight matrix.
+    Compute comprehensive spectral metrics for every 2-D parameter.
+    Logs everything we could need so we never have to rerun.
     """
     records = []
     for name, param in model.named_parameters():
@@ -123,10 +159,30 @@ def compute_spectral_metrics(model, full_svd=False):
             S = torch.linalg.svdvals(param.data.float())
         rec = dict(
             name=name,
+            shape=list(param.shape),
+            # Entropy metrics
             spectral_entropy=_spectral_entropy(S),
-            s_mu_1=_s_mu_metric(S, mu=1.0),
+            spectral_entropy_normalized=_spectral_entropy_normalized(S),
+            h_max=math.log(min(param.shape[0], param.shape[1])),
+            # Rank and condition
+            effective_rank=_effective_rank(S),
+            stable_rank=_stable_rank(S),
+            condition_number=_condition_number(S),
+            numerical_rank=int((S > 1e-6 * S[0]).sum().item()),
+            # Norms and ratios
+            frobenius_norm=(S**2).sum().sqrt().item(),
+            nuclear_norm=S.sum().item(),
+            operator_norm=S[0].item(),
+            nuclear_to_frobenius=_nuclear_to_frobenius(S),
+            # Spectral shape
             top1_sv=S[0].item(),
-            rank=int((S > 1e-6).sum().item()),
+            top5_sv=S[:5].cpu().tolist() if len(S) >= 5 else S.cpu().tolist(),
+            bottom5_sv=S[-5:].cpu().tolist() if len(S) >= 5 else S.cpu().tolist(),
+            sv_mean=S.mean().item(),
+            sv_std=S.std().item(),
+            gini=_gini_coefficient(S),
+            # S(mu) functional (expensive for large matrices, skip if dim > 512)
+            s_mu=(_s_mu_functional(S) if len(S) <= 512 else None),
         )
         if full_svd:
             rec['singular_values'] = S.cpu().tolist()
@@ -173,7 +229,7 @@ optimizer = 'adamw'             # 'adamw' | 'muon'
 muon_lr = 0.02
 muon_momentum = 0.95
 spectral_log_every = 500        # 0 = disabled
-spectral_full_svd = False       # save full singular-value vectors
+spectral_full_svd = True        # save full singular-value vectors (small for n_embd<=512)
 seed = 1337                     # random seed (nanoGPT has no built-in seed config)
 
 # ============================================================================
@@ -314,10 +370,17 @@ def patch_training_loop(src: str) -> str:
     log_call = textwrap.dedent('''\
             # --- MUON PATCH: spectral log ---
             if _spectral_logger is not None:
-                _spectral_logger.maybe_log(
-                    model, iter_num,
-                    extra={'train_loss': lossf if 'lossf' in dir() else None}
-                )
+                _extra = {'train_loss': lossf if 'lossf' in dir() else None}
+                # Log gradient norms per layer (cheap, always available)
+                try:
+                    _grad_norms = {}
+                    for _pname, _pparam in model.named_parameters():
+                        if _pparam.grad is not None and _pparam.dim() >= 2:
+                            _grad_norms[_pname] = _pparam.grad.data.norm().item()
+                    _extra['grad_norms'] = _grad_norms
+                except Exception:
+                    pass
+                _spectral_logger.maybe_log(model, iter_num, extra=_extra)
             # --- END MUON PATCH ---
     ''')
 

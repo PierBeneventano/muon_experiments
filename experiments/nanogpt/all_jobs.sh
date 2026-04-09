@@ -89,6 +89,7 @@ for OPT in muon adamw; do
     for SEED in "${SEEDS[@]}"; do
         submit "exp01_${OPT}_s${SEED}" "$SLURM_TIME_SHORT" \
             python experiments/nanogpt/01_muon_vs_adamw.py \
+                --output_dir "$RESULTS_ROOT/nanogpt/01_muon_vs_adamw" \
                 --optimizer "$OPT" --seed "$SEED"
     done
 done
@@ -102,6 +103,7 @@ for BS in 8 16 32 64 128 256 512; do
         for SEED in "${SEEDS[@]}"; do
             submit "exp02_${OPT}_bs${BS}_s${SEED}" "$SLURM_TIME_SHORT" \
                 python experiments/nanogpt/02_batch_size_sweep.py \
+                --output_dir "$RESULTS_ROOT/nanogpt/02_batch_size_sweep" \
                     --batch_size "$BS" --optimizer "$OPT" --seed "$SEED"
         done
     done
@@ -116,6 +118,7 @@ for LR in 1e-4 3e-4 1e-3 3e-3 1e-2 3e-2 1e-1; do
         for OPT in muon adamw; do
             submit "exp03_${OPT}_lr${LR}_bs${BS}" "$SLURM_TIME_SHORT" \
                 python experiments/nanogpt/03_lr_sweep.py \
+                --output_dir "$RESULTS_ROOT/nanogpt/03_lr_sweep" \
                     --lr "$LR" --batch_size "$BS" --optimizer "$OPT" --seed 42
         done
     done
@@ -129,6 +132,7 @@ for OPT in muon adamw; do
     for SEED in "${SEEDS[@]}"; do
         submit "exp04_${OPT}_s${SEED}" "$SLURM_TIME_SHORT" \
             python experiments/nanogpt/04_spectral_tracking.py \
+                --output_dir "$RESULTS_ROOT/nanogpt/04_spectral_tracking" \
                 --optimizer "$OPT" --seed "$SEED" --log_every 100
     done
 done
@@ -141,6 +145,7 @@ for OPT in muon adamw; do
     for SEED in "${SEEDS[@]}"; do
         submit "exp05_${OPT}_s${SEED}" "$SLURM_TIME_SHORT" \
             python experiments/nanogpt/05_feature_acquisition.py \
+                --output_dir "$RESULTS_ROOT/nanogpt/05_feature_acquisition" \
                 --optimizer "$OPT" --seed "$SEED" --log_every 100 --top_k 10
     done
 done
@@ -154,6 +159,7 @@ for WD in 0 0.01 0.1 0.3; do
         for SEED in "${SEEDS[@]}"; do
             submit "exp06_${OPT}_wd${WD}_s${SEED}" "$SLURM_TIME_SHORT" \
                 python experiments/nanogpt/06_weight_decay_ablation.py \
+                --output_dir "$RESULTS_ROOT/nanogpt/06_weight_decay_ablation" \
                     --weight_decay "$WD" --optimizer "$OPT" --seed "$SEED"
         done
     done
@@ -167,6 +173,7 @@ for MOM in 0 0.5 0.9 0.95 0.99; do
     for SEED in "${SEEDS[@]}"; do
         submit "exp07_mom${MOM}_s${SEED}" "$SLURM_TIME_SHORT" \
             python experiments/nanogpt/07_momentum_ablation.py \
+                --output_dir "$RESULTS_ROOT/nanogpt/07_momentum_ablation" \
                 --momentum "$MOM" --seed "$SEED"
     done
 done
@@ -180,6 +187,7 @@ for EMBD in 64 128 256 512; do
         for SEED in "${SEEDS[@]}"; do
             submit "exp08_${OPT}_embd${EMBD}_s${SEED}" "$SLURM_TIME_MEDIUM" \
                 python experiments/nanogpt/08_model_scale.py \
+                --output_dir "$RESULTS_ROOT/nanogpt/08_model_scale" \
                     --n_embd "$EMBD" --optimizer "$OPT" --seed "$SEED"
         done
     done
@@ -194,6 +202,7 @@ for DEPTH in 2 4 6 8; do
         for SEED in "${SEEDS[@]}"; do
             submit "exp09_${OPT}_depth${DEPTH}_s${SEED}" "$SLURM_TIME_MEDIUM" \
                 python experiments/nanogpt/09_depth_ablation.py \
+                --output_dir "$RESULTS_ROOT/nanogpt/09_depth_ablation" \
                     --n_layer "$DEPTH" --optimizer "$OPT" --seed "$SEED"
         done
     done
@@ -208,6 +217,7 @@ for HEADS in 1 2 4 8; do
         for SEED in "${SEEDS[@]}"; do
             submit "exp10_${OPT}_heads${HEADS}_s${SEED}" "$SLURM_TIME_SHORT" \
                 python experiments/nanogpt/10_head_ablation.py \
+                --output_dir "$RESULTS_ROOT/nanogpt/10_head_ablation" \
                     --n_head "$HEADS" --optimizer "$OPT" --seed "$SEED"
         done
     done
@@ -231,6 +241,7 @@ for TASK in generation classification; do
         for SEED in "${SEEDS[@]}"; do
             submit "exp12_${TASK}_${OPT}_s${SEED}" "$SLURM_TIME_SHORT" \
                 python experiments/nanogpt/12_regression_vs_cls.py \
+                --output_dir "$RESULTS_ROOT/nanogpt/12_regression_vs_cls" \
                     --task "$TASK" --optimizer "$OPT" --seed "$SEED"
         done
     done

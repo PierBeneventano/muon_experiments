@@ -64,7 +64,7 @@ def run(args):
         f"--muon_lr={args.lr}",
         f"--muon_momentum={args.momentum}",
         f"--spectral_log_every=500",
-        f"--spectral_full_svd=False",
+        f"--spectral_full_svd=True",
         f"--wandb_log=False",
         f"--compile=False",
         f"--decay_lr=False",
