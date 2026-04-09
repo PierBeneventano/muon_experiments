@@ -1,0 +1,47 @@
+# shakespeare_word.yaml -- Medium experiments (~10 min/run on single GPU)
+# Word-level Shakespeare, larger model for richer spectral structure.
+
+dataset: shakespeare_char    # same data, larger model
+data_dir: data/shakespeare_char
+
+# Model architecture -- wider and deeper than char config
+n_layer: 6
+n_head: 6
+n_embd: 384
+block_size: 256
+bias: false
+dropout: 0.1
+
+# Training
+batch_size: 32
+max_iters: 10000
+eval_interval: 1000
+log_interval: 10
+eval_iters: 200
+gradient_accumulation_steps: 2
+
+# Optimiser defaults
+learning_rate: 3e-4
+weight_decay: 0.1
+beta1: 0.9
+beta2: 0.99
+grad_clip: 1.0
+
+# Muon defaults
+muon_lr: 0.01
+muon_momentum: 0.95
+
+# LR schedule
+decay_lr: true
+warmup_iters: 200
+lr_decay_iters: 10000
+min_lr: 1e-5
+
+# Spectral logging
+spectral_log_every: 1000
+spectral_full_svd: false
+
+# System
+device: cuda
+compile: false
+wandb_log: false

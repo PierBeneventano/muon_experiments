@@ -1,0 +1,47 @@
+# shakespeare_char.yaml -- Quick experiments (~2 min/run on single GPU)
+# Character-level Shakespeare, small model.
+
+dataset: shakespeare_char
+data_dir: data/shakespeare_char
+
+# Model architecture
+n_layer: 4
+n_head: 4
+n_embd: 128
+block_size: 256
+bias: false
+dropout: 0.0
+
+# Training
+batch_size: 64
+max_iters: 5000
+eval_interval: 500
+log_interval: 10
+eval_iters: 200
+gradient_accumulation_steps: 1
+
+# Optimiser defaults (can be overridden per-experiment)
+learning_rate: 1e-3        # AdamW default
+weight_decay: 0.1
+beta1: 0.9
+beta2: 0.99
+grad_clip: 1.0
+
+# Muon defaults
+muon_lr: 0.02
+muon_momentum: 0.95
+
+# LR schedule
+decay_lr: true
+warmup_iters: 100
+lr_decay_iters: 5000
+min_lr: 1e-4
+
+# Spectral logging
+spectral_log_every: 500
+spectral_full_svd: false
+
+# System
+device: cuda
+compile: false
+wandb_log: false

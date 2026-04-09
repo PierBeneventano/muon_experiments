@@ -1,0 +1,51 @@
+# openwebtext_small.yaml -- Full experiments (~30 min/run on single GPU)
+# OpenWebText (small subset), GPT-2-style model.
+#
+# NOTE: Requires running nanoGPT/data/openwebtext/prepare.py first.
+# This downloads and tokenizes a subset of OpenWebText (~9B tokens).
+# For a quicker version, manually limit the number of shards.
+
+dataset: openwebtext
+data_dir: data/openwebtext
+
+# Model architecture -- GPT-2 small scale
+n_layer: 6
+n_head: 8
+n_embd: 512
+block_size: 512
+bias: false
+dropout: 0.1
+
+# Training
+batch_size: 16
+max_iters: 20000
+eval_interval: 2000
+log_interval: 10
+eval_iters: 200
+gradient_accumulation_steps: 8    # effective batch = 16 * 8 = 128
+
+# Optimiser defaults
+learning_rate: 3e-4
+weight_decay: 0.1
+beta1: 0.9
+beta2: 0.95
+grad_clip: 1.0
+
+# Muon defaults
+muon_lr: 0.005
+muon_momentum: 0.95
+
+# LR schedule
+decay_lr: true
+warmup_iters: 500
+lr_decay_iters: 20000
+min_lr: 1e-5
+
+# Spectral logging -- less frequent to avoid SVD overhead
+spectral_log_every: 2000
+spectral_full_svd: false
+
+# System
+device: cuda
+compile: true
+wandb_log: false

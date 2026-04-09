@@ -1,0 +1,34 @@
+# Results (large, generated)
+experiments/results/matrix_sensing/*.json
+experiments/results/nanogpt/
+experiments/results/plots/
+experiments/results/slurm_logs/
+
+# NanoGPT clone (will be cloned on cluster)
+nanoGPT/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Pipeline state (not needed on cluster)
+state.json
+logs/
+cycle_*/
+review_*/
+initial_context/*.pdf
+
+# LaTeX aux
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.synctex.gz
+*.fls
+*.fdb_latexmk
