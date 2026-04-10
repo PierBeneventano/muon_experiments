@@ -5,28 +5,15 @@
 # Run LOCALLY after rsyncing results from the cluster.
 # Counts completed runs, identifies new results since last check,
 # and suggests which plot scripts to re-run.
+#
+# Compatible with macOS default bash (3.2+) -- no associative arrays.
 # =============================================================================
 set -euo pipefail
 
 RESULTS_DIR="/Users/pier-pc4/Desktop/Experiments/PoggioAI-results/project_003_muon/experiments/results/nanogpt"
 LAST_CHECK_FILE="${RESULTS_DIR}/.last_check"
 
-# Experiment directories and their associated plot scripts
-declare -A PLOT_MAP
-PLOT_MAP=(
-    ["01_muon_vs_adamw"]="plot_nanogpt_bcrit.py"
-    ["02_batch_size_sweep"]="plot_nanogpt_bcrit.py"
-    ["03_lr_sweep"]="plot_nanogpt_bcrit.py"
-    ["04_spectral_tracking"]="plot_nanogpt_spectral.py"
-    ["05_feature_acquisition"]="plot_nanogpt_spectral.py"
-    ["06_weight_decay_ablation"]="plot_nanogpt_ablations.py"
-    ["07_momentum_ablation"]="plot_nanogpt_ablations.py"
-    ["08_model_scale"]="plot_nanogpt_ablations.py"
-    ["10_head_ablation"]="plot_nanogpt_ablations.py"
-    ["12_regression_vs_cls"]="(standalone analysis)"
-)
-
-# Ordered list for consistent output
+# Experiment directories (ordered)
 EXPERIMENTS=(
     "01_muon_vs_adamw"
     "02_batch_size_sweep"
@@ -40,6 +27,20 @@ EXPERIMENTS=(
     "12_regression_vs_cls"
 )
 
+# Parallel array: plot script for each experiment (same indices as EXPERIMENTS)
+PLOT_SCRIPTS=(
+    "plot_nanogpt_bcrit.py"
+    "plot_nanogpt_bcrit.py"
+    "plot_nanogpt_bcrit.py"
+    "plot_nanogpt_spectral.py"
+    "plot_nanogpt_spectral.py"
+    "plot_nanogpt_ablations.py"
+    "plot_nanogpt_ablations.py"
+    "plot_nanogpt_ablations.py"
+    "plot_nanogpt_ablations.py"
+    "(standalone analysis)"
+)
+
 # ── Colors ───────────────────────────────────────────────────────────────────
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -47,6 +48,20 @@ RED='\033[0;31m'
 CYAN='\033[0;36m'
 BOLD='\033[1m'
 RESET='\033[0m'
+
+# ── Helper: look up plot script index for an experiment ──────────────────────
+get_plot_script() {
+    local exp="$1"
+    local i=0
+    for e in "${EXPERIMENTS[@]}"; do
+        if [ "$e" = "$exp" ]; then
+            echo "${PLOT_SCRIPTS[$i]}"
+            return
+        fi
+        i=$((i + 1))
+    done
+    echo ""
+}
 
 # =============================================================================
 # 0. Check results directory exists
@@ -92,8 +107,8 @@ TOTAL_DONE=0
 TOTAL_RUNS=0
 TOTAL_NEW=0
 
-# Track which experiments have new data (for plot suggestions)
-declare -A HAS_NEW_DATA
+# Track which experiments have new data (space-separated list)
+EXPS_WITH_NEW_DATA=""
 
 for EXP in "${EXPERIMENTS[@]}"; do
     EXP_DIR="${RESULTS_DIR}/${EXP}"
@@ -124,7 +139,7 @@ for EXP in "${EXPERIMENTS[@]}"; do
     TOTAL_NEW=$((TOTAL_NEW + N_NEW))
 
     if [ "$N_NEW" -gt 0 ]; then
-        HAS_NEW_DATA["$EXP"]=1
+        EXPS_WITH_NEW_DATA="${EXPS_WITH_NEW_DATA} ${EXP}"
     fi
 
     # Format completion percentage
@@ -172,44 +187,46 @@ for EXP in "${EXPERIMENTS[@]}"; do
     EXP_DIR="${RESULTS_DIR}/${EXP}"
     [ ! -d "$EXP_DIR" ] && continue
 
-    SUCCEEDED=()
-    FAILED=()
+    N_SUCC=0
+    N_FAIL=0
+    FAILED_LIST=""
+    NEW_LIST=""
 
     for RUN_DIR in "$EXP_DIR"/*/; do
         [ ! -d "$RUN_DIR" ] && continue
         RUN_NAME=$(basename "$RUN_DIR")
 
         if [ -f "${RUN_DIR}summary.json" ]; then
+            N_SUCC=$((N_SUCC + 1))
             # Check if this is a new result
             if [ "$LAST_CHECK_EPOCH" -gt 0 ] && [ "$LAST_CHECK_FILE" -ot "${RUN_DIR}summary.json" ]; then
-                SUCCEEDED+=("${RUN_NAME} ${GREEN}(new)${RESET}")
-            else
-                SUCCEEDED+=("$RUN_NAME")
+                NEW_LIST="${NEW_LIST}${RUN_NAME}\n"
             fi
         else
-            FAILED+=("$RUN_NAME")
+            N_FAIL=$((N_FAIL + 1))
+            FAILED_LIST="${FAILED_LIST}${RUN_NAME}\n"
         fi
     done
 
-    N_SUCC=${#SUCCEEDED[@]}
-    N_FAIL=${#FAILED[@]}
-
     echo -e "  ${BOLD}${EXP}${RESET}  (${GREEN}${N_SUCC} ok${RESET}, ${RED}${N_FAIL} missing${RESET})"
 
+    # Show failed runs
     if [ "$N_FAIL" -gt 0 ]; then
-        for f in "${FAILED[@]}"; do
+        echo -en "$FAILED_LIST" | while read -r f; do
+            [ -z "$f" ] && continue
             echo -e "    ${RED}x${RESET} $f"
         done
     fi
 
-    # Only show new results in detail to keep output manageable
+    # Show only new results in detail to keep output manageable
     NEW_SHOWN=false
-    for s in "${SUCCEEDED[@]}"; do
-        if [[ "$s" == *"(new)"* ]]; then
-            echo -e "    ${GREEN}+${RESET} $s"
-            NEW_SHOWN=true
-        fi
-    done
+    if [ -n "$NEW_LIST" ]; then
+        echo -en "$NEW_LIST" | while read -r r; do
+            [ -z "$r" ] && continue
+            echo -e "    ${GREEN}+${RESET} ${r} ${GREEN}(new)${RESET}"
+        done
+        NEW_SHOWN=true
+    fi
 
     if ! $NEW_SHOWN && [ "$N_FAIL" -eq 0 ]; then
         echo -e "    ${GREEN}All ${N_SUCC} runs complete${RESET}"
@@ -231,8 +248,8 @@ if [ "$TOTAL_NEW" -gt 0 ]; then
         echo "  New files:"
         find "$RESULTS_DIR" -name "summary.json" -newer "$LAST_CHECK_FILE" -print 2>/dev/null | \
             sort | while read -r f; do
-            REL_PATH="${f#"$RESULTS_DIR"/}"
-            echo "    $REL_PATH"
+            # Strip the results dir prefix for cleaner output
+            echo "    ${f#${RESULTS_DIR}/}"
         done
         echo ""
     fi
@@ -244,29 +261,34 @@ fi
 echo -e "${CYAN}--- Suggested Plot Scripts to Re-run ---${RESET}"
 echo ""
 
-# Collect unique plot scripts that need updating
-declare -A PLOTS_TO_RUN
+# Build a deduplicated list of (plot_script -> triggering experiments)
+# Using a temp file since bash 3.2 lacks associative arrays
+PLOT_SUGGESTIONS_FILE=$(mktemp)
+trap "rm -f '$PLOT_SUGGESTIONS_FILE'" EXIT
 
-for EXP in "${!HAS_NEW_DATA[@]}"; do
-    PLOT="${PLOT_MAP[$EXP]}"
+for EXP in $EXPS_WITH_NEW_DATA; do
+    PLOT=$(get_plot_script "$EXP")
     if [ -n "$PLOT" ]; then
-        # Append experiment name to the plot entry
-        if [ -n "${PLOTS_TO_RUN[$PLOT]+x}" ]; then
-            PLOTS_TO_RUN["$PLOT"]="${PLOTS_TO_RUN[$PLOT]}, ${EXP}"
-        else
-            PLOTS_TO_RUN["$PLOT"]="$EXP"
-        fi
+        echo "${PLOT}|${EXP}" >> "$PLOT_SUGGESTIONS_FILE"
     fi
 done
 
-if [ ${#PLOTS_TO_RUN[@]} -eq 0 ]; then
+if [ ! -s "$PLOT_SUGGESTIONS_FILE" ]; then
     echo -e "  ${GREEN}No new data -- nothing to re-plot.${RESET}"
 else
-    for PLOT in $(echo "${!PLOTS_TO_RUN[@]}" | tr ' ' '\n' | sort -u); do
-        echo -e "  ${BOLD}${PLOT}${RESET}"
-        echo "    Triggered by: ${PLOTS_TO_RUN[$PLOT]}"
-        echo ""
+    # Group by plot script, sorted
+    CURRENT_PLOT=""
+    sort "$PLOT_SUGGESTIONS_FILE" | while IFS='|' read -r PLOT EXP; do
+        if [ "$PLOT" != "$CURRENT_PLOT" ]; then
+            if [ -n "$CURRENT_PLOT" ]; then
+                echo ""
+            fi
+            echo -e "  ${BOLD}${PLOT}${RESET}"
+            CURRENT_PLOT="$PLOT"
+        fi
+        echo "    - triggered by: ${EXP}"
     done
+    echo ""
 fi
 echo ""
 
