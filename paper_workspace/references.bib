@@ -1,0 +1,344 @@
+% References for: "The Implicit Bias of the Muon Optimizer:
+%   Spectral Symmetrization, Concurrent Acquisition, and Batch Scaling"
+% Merged from v4 + Ours papers
+
+% =============================================
+% MUON OPTIMIZER: ORIGINS AND CORE THEORY
+% =============================================
+
+@misc{karpathy2023nanogpt,
+  author = {Karpathy, Andrej},
+  title  = {{nanoGPT}: The simplest, fastest repository for training/finetuning medium-sized {GPT}s},
+  year   = {2023},
+  url    = {https://github.com/karpathy/nanoGPT},
+  note   = {GitHub repository},
+}
+
+@misc{jordan2024muon,
+  author = {Jordan, Keller},
+  title = {Muon: An Optimizer for Hidden Layers in Neural Networks},
+  year = {2024},
+  howpublished = {\url{https://kellerjordan.github.io/posts/muon/}},
+  note = {Blog post and GitHub repository}
+}
+
+@article{bernstein2024old,
+  author = {Bernstein, Jeremy and Newhouse, Laker},
+  title = {Old Optimizer, New Norm: An Anthology},
+  year = {2024},
+  journal = {arXiv preprint},
+  note = {arXiv:2409.20325}
+}
+
+@article{bernstein2024modular,
+  author = {Bernstein, Jeremy and Newhouse, Laker},
+  title = {Modular Duality in Deep Learning},
+  year = {2024},
+  journal = {arXiv preprint},
+  note = {arXiv:2410.21265}
+}
+
+@mastersthesis{newhouse2025thesis,
+  author = {Newhouse, Laker},
+  title = {Duality, Weight Decay, and Metrized Deep Learning},
+  school = {Massachusetts Institute of Technology},
+  year = {2025},
+  type = {M.Eng. Thesis},
+  department = {Department of Electrical Engineering and Computer Science}
+}
+
+% =============================================
+% MUON EXTENSIONS AND ANALYSIS (2025-2026)
+% =============================================
+
+@article{ma2026preconditioning,
+  author = {Ma, Jianhao and others},
+  title = {Preconditioning Benefits of Spectral Orthogonalization in {Muon}},
+  year = {2026},
+  journal = {arXiv preprint arXiv:2601.13474}
+}
+
+@article{liu2025scalable,
+  author = {Liu, Jingyuan and Su, Jianlin},
+  title = {Muon is Scalable for {LLM} Training},
+  year = {2025},
+  journal = {arXiv preprint arXiv:2502.16982}
+}
+
+@article{li2026associative,
+  author = {Li, Yingcong and Wang, Mingze and Zhong, Zixuan and Lu, Yilong and Wang, Ju-Chieh},
+  title = {Muon in Associative Memory Learning: Training Dynamics and Scaling Laws},
+  year = {2026},
+  journal = {arXiv preprint arXiv:2602.05725}
+}
+
+@article{li2026sharp,
+  author = {Li, Yingcong and others},
+  title = {Sharp Capacity Scaling of Spectral Optimizers in Learning Associative Memory},
+  year = {2026},
+  journal = {arXiv preprint arXiv:2603.26554}
+}
+
+@article{wang2025tailend,
+  author = {Wang, Shuche and others},
+  title = {Muon Outperforms {Adam} in Tail-End Associative Memory Learning},
+  year = {2025},
+  journal = {arXiv preprint arXiv:2509.26030}
+}
+
+@article{muon2025spectralnorm,
+  title = {Muon Optimizes Under Spectral Norm Constraints},
+  year = {2025},
+  journal = {arXiv preprint arXiv:2506.15054}
+}
+
+@article{normuon2025,
+  title = {{NorMuon}: Making {Muon} More Efficient and Scalable},
+  year = {2025},
+  journal = {arXiv preprint arXiv:2510.05491}
+}
+
+@article{turbomuon2025,
+  title = {Turbo-{Muon}: Accelerating Orthogonality-Based Optimization with Pre-Conditioning},
+  year = {2025},
+  journal = {arXiv preprint arXiv:2512.04632}
+}
+
+@article{muonconvergence2026,
+  title = {Convergence of {Muon} with {Newton--Schulz}},
+  year = {2026},
+  journal = {arXiv preprint arXiv:2601.19156}
+}
+
+@article{tousemuon2026,
+  title = {To Use or Not to Use {Muon}: How Simplicity Bias in Optimizers Matters},
+  year = {2026},
+  journal = {arXiv preprint arXiv:2603.00742}
+}
+
+% =============================================
+% SPECTRAL GRADIENT DESCENT / FEATURE LEARNING
+% =============================================
+
+@article{vasudeva2025imbalanced,
+  author = {Vasudeva, Bhavya and others},
+  title = {How {Muon}'s Spectral Design Benefits Generalization: A Study on Imbalanced Data},
+  year = {2025},
+  journal = {arXiv preprint arXiv:2510.22980}
+}
+
+@article{vasudeva2025generalization,
+  author = {Vasudeva, Bhavya and others},
+  title = {On Generalization of Spectral Gradient Descent},
+  year = {2025},
+  journal = {OpenReview}
+}
+
+@article{vasudeva2026phaseretrieval,
+  author = {Vasudeva, Bhavya and others},
+  title = {Spectral Gradient Descent Mitigates Anisotropy-Driven Misalignment: A Case Study in Phase Retrieval},
+  year = {2026},
+  journal = {arXiv preprint arXiv:2601.22652}
+}
+
+% =============================================
+% IMPLICIT BIAS AND BREGMAN FRAMEWORK
+% =============================================
+
+@inproceedings{gunasekar2017implicit,
+  author = {Gunasekar, Suriya and Woodworth, Blake E. and Bhojanapalli, Srinadh and Neyshabur, Behnam and Srebro, Nathan},
+  title = {Implicit Regularization in Matrix Factorization},
+  booktitle = {Advances in Neural Information Processing Systems},
+  volume = {30},
+  year = {2017},
+  note = {arXiv:1705.09280}
+}
+
+@inproceedings{wu2021mirror,
+  author = {Wu, Fan and Rebeschini, Patrick},
+  title = {Implicit Regularization in Matrix Sensing via Mirror Descent},
+  booktitle = {Advances in Neural Information Processing Systems},
+  volume = {34},
+  year = {2021},
+  note = {arXiv:2105.13831}
+}
+
+@inproceedings{arora2019implicit,
+  author = {Arora, Sanjeev and Cohen, Nadav and Hu, Wei and Luo, Yuping},
+  title = {Implicit Regularization in Deep Matrix Factorization},
+  booktitle = {Advances in Neural Information Processing Systems},
+  volume = {32},
+  year = {2019},
+  note = {arXiv:1905.13655}
+}
+
+@inproceedings{li2021greedy,
+  author = {Li, Zhiyuan and Luo, Yuping and Lyu, Kaifeng},
+  title = {Towards Resolving the Implicit Bias of Gradient Descent for Matrix Factorization: Greedy Low-Rank Learning},
+  booktitle = {International Conference on Learning Representations},
+  year = {2021},
+  note = {arXiv:2012.09839}
+}
+
+% =============================================
+% BATCH SCALING AND CRITICAL BATCH SIZE
+% =============================================
+
+@article{mccandlish2018empirical,
+  author = {McCandlish, Sam and Kaplan, Jared and Amodei, Dario and others},
+  title = {An Empirical Model of Large-Batch Training},
+  year = {2018},
+  journal = {arXiv preprint arXiv:1812.06162}
+}
+
+@inproceedings{mccandlish2025revisited,
+  title = {Critical Batch Size Revisited: A Simple Empirical Approach to Large-Batch Language Model Training},
+  year = {2025},
+  booktitle = {Advances in Neural Information Processing Systems},
+  note = {arXiv:2505.23971}
+}
+
+% =============================================
+% CONVEX ANALYSIS AND SPECTRAL FUNCTIONS
+% =============================================
+
+@article{lewis1996convex,
+  author = {Lewis, Adrian S.},
+  title = {Convex Analysis on the {Hermitian} Matrices},
+  journal = {SIAM Journal on Optimization},
+  volume = {6},
+  number = {1},
+  pages = {164--177},
+  year = {1996}
+}
+
+@article{lewis1996eigenvalue,
+  author = {Lewis, Adrian S. and Overton, Michael L.},
+  title = {Eigenvalue Optimization},
+  journal = {Acta Numerica},
+  volume = {5},
+  pages = {149--190},
+  year = {1996}
+}
+
+@article{lewis2003mathematics,
+  author = {Lewis, Adrian S.},
+  title = {The Mathematics of Eigenvalue Optimization},
+  journal = {Mathematical Programming},
+  volume = {97},
+  pages = {155--176},
+  year = {2003}
+}
+
+% =============================================
+% SEQUENTIAL LEARNING AND DEEP LINEAR NETWORKS
+% =============================================
+
+@inproceedings{saxe2014exact,
+  author = {Saxe, Andrew M. and McClelland, James L. and Ganguli, Surya},
+  title = {Exact Solutions to the Nonlinear Dynamics of Learning in Deep Linear Neural Networks},
+  booktitle = {International Conference on Learning Representations},
+  year = {2014},
+  note = {arXiv:1312.6120}
+}
+
+% =============================================
+% NUCLEAR NORM AND MATRIX RECOVERY
+% =============================================
+
+@article{recht2010guaranteed,
+  author = {Recht, Benjamin and Fazel, Maryam and Parrilo, Pablo A.},
+  title = {Guaranteed Minimum-Rank Solutions of Linear Matrix Equations via Nuclear Norm Minimization},
+  journal = {SIAM Review},
+  volume = {52},
+  number = {3},
+  pages = {471--501},
+  year = {2010}
+}
+
+% =============================================
+% LARS OPTIMIZER
+% =============================================
+
+@article{you2017lars,
+  author = {You, Yang and Gitman, Igor and Ginsburg, Boris},
+  title = {Large Batch Training of Convolutional Networks},
+  year = {2017},
+  journal = {arXiv preprint arXiv:1708.03888}
+}
+
+% =============================================
+% NEURAL COLLAPSE AND LANGUAGE FEATURES
+% =============================================
+
+@article{papyan2020neural,
+  author = {Papyan, Vardan and Han, X.Y. and Donoho, David L.},
+  title = {Prevalence of Neural Collapse During the Terminal Phase of Deep Learning Training},
+  journal = {Proceedings of the National Academy of Sciences},
+  volume = {117},
+  number = {40},
+  pages = {24652--24663},
+  year = {2020}
+}
+
+@article{wu2024linguistic,
+  author = {Wu, Robert and Maji, Subhransu},
+  title = {Linguistic Collapse: Neural Collapse in (Large) Language Models},
+  year = {2024},
+  journal = {arXiv preprint arXiv:2405.17767}
+}
+
+% =============================================
+% SPECTRAL DYNAMICS AND WEIGHT ANALYSIS
+% =============================================
+
+@article{yunis2024spectral,
+  author = {Yunis, David and others},
+  title = {Approaching Deep Learning through the Spectral Dynamics of Weights},
+  year = {2024},
+  journal = {Technical Report, Toyota Technological Institute at Chicago}
+}
+
+% =============================================
+% WEIGHT DECAY AND REGULARIZATION
+% =============================================
+
+@article{alphadecay2025,
+  title = {{AlphaDecay}: Module-wise Weight Decay for Heavy-Tailed Balancing in {LLMs}},
+  year = {2025},
+  journal = {arXiv preprint arXiv:2506.14562}
+}
+
+% =============================================
+% ADDITIONAL NORMALIZER REFERENCES
+% =============================================
+
+@article{conda2025,
+  title = {{CONDA}: Column-Normalized {Adam} for Training},
+  year = {2025},
+  journal = {arXiv preprint arXiv:2509.24218}
+}
+
+% =============================================
+% MATRIX PERTURBATION THEORY
+% =============================================
+
+@book{stewart1990matrix,
+  author = {Stewart, G. W. and Sun, Ji-guang},
+  title = {Matrix Perturbation Theory},
+  publisher = {Academic Press},
+  year = {1990}
+}
+
+% =============================================
+% POGGIOAI ACKNOWLEDGEMENT (MANDATORY)
+% =============================================
+
+@techreport{PoggioAIMSc_2026,
+  author       = {Mahmoud Abdelmoneum and Pierfrancesco Beneventano and Tomaso Poggio},
+  title        = {PoggioAI/MSc: ML Theory Research with Humans on the Loop},
+  institution  = {MIT},
+  year         = {2026},
+  number       = {Technical Report v0},
+  url          = {https://poggioai.github.io/papers/poggioai-msc-v0.pdf},
+}
