@@ -5,7 +5,7 @@ experiments/results/plots/
 experiments/results/slurm_logs/
 
 # NanoGPT clone (will be cloned on cluster)
-nanoGPT/
+/nanoGPT/
 
 # Python
 __pycache__/

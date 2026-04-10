@@ -71,9 +71,14 @@ $ACCT_FLAG
 #SBATCH --output=$LOG_DIR/${JOB_NAME}_%j.out
 #SBATCH --error=$LOG_DIR/${JOB_NAME}_%j.err
 
+# Robust conda activation for non-interactive sbatch shells
 source /etc/profile.d/modules.sh 2>/dev/null || true
 module load miniforge 2>/dev/null || true
-conda activate $CONDA_ENV 2>/dev/null || true
+eval "\$(conda shell.bash hook 2>/dev/null)" 2>/dev/null || true
+conda activate $CONDA_ENV
+
+# Verify python is available
+which python || { echo "ERROR: python not found after conda activate"; exit 1; }
 
 cd "$PROJECT_ROOT"
 $CMD
