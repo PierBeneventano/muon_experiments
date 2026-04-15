@@ -92,18 +92,30 @@ def run(args):
         "max_iters": args.max_iters,
     }
 
-    print(f"[08] n_embd={args.n_embd} | {args.optimizer} | seed={args.seed}")
+    print(f"[08] n_embd={args.n_embd} | {args.optimizer} | seed={args.seed}", flush=True)
+    print(f"[08] CMD: {' '.join(cmd)}", flush=True)
+    print(f"[08] cwd: {os.path.join(PROJECT_ROOT, 'nanoGPT')}", flush=True)
     t0 = time.time()
     result = subprocess.run(cmd, capture_output=True, text=True,
                             cwd=os.path.join(PROJECT_ROOT, "nanoGPT"))
     elapsed = time.time() - t0
     meta["elapsed_s"] = round(elapsed, 1)
     meta["returncode"] = result.returncode
+    print(f"[08] Subprocess done: rc={result.returncode} elapsed={elapsed:.1f}s "
+          f"stdout_lines={len(result.stdout.splitlines())} stderr_lines={len(result.stderr.splitlines())}", flush=True)
 
     with open(os.path.join(out_dir, "stdout.txt"), "w") as f:
         f.write(result.stdout)
     with open(os.path.join(out_dir, "stderr.txt"), "w") as f:
         f.write(result.stderr)
+
+    if result.returncode != 0:
+        print(f"[08] SUBPROCESS FAILED (rc={result.returncode}). Last 80 stderr lines:", flush=True)
+        for line in result.stderr.splitlines()[-80:]:
+            print(f"  [stderr] {line}", flush=True)
+        print(f"[08] Last 40 stdout lines:", flush=True)
+        for line in result.stdout.splitlines()[-40:]:
+            print(f"  [stdout] {line}", flush=True)
 
     train_losses = []
     for line in result.stdout.splitlines():

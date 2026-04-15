@@ -83,17 +83,42 @@ $ACCT_FLAG
 #SBATCH --output=$LOG_DIR/${JOB_NAME}_%j.out
 #SBATCH --error=$LOG_DIR/${JOB_NAME}_%j.err
 
+# === BEGIN DIAGNOSTIC PREAMBLE ===
+set -eo pipefail                       # fail fast + preserve pipe status
+exec 2>&1                              # mirror stderr to stdout so the SLURM .out has everything
+echo "[sbatch] host=\$(hostname) pid=\$\$ date=\$(date -Iseconds)"
+echo "[sbatch] SLURM_JOB_ID=\${SLURM_JOB_ID:-n/a} partition=\${SLURM_JOB_PARTITION:-n/a}"
+echo "[sbatch] node=\$(scontrol show hostname \${SLURM_JOB_NODELIST:-\$(hostname)} 2>/dev/null | head -1)"
+echo "[sbatch] CUDA_VISIBLE_DEVICES=\${CUDA_VISIBLE_DEVICES:-unset}"
+nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv,noheader 2>&1 | head -5 || echo "[sbatch] nvidia-smi not available"
+# === END DIAGNOSTIC PREAMBLE ===
+
 # Robust conda activation for non-interactive sbatch shells
 source /etc/profile.d/modules.sh 2>/dev/null || true
 module load miniforge 2>/dev/null || true
 eval "\$(conda shell.bash hook 2>/dev/null)" 2>/dev/null || true
 conda activate $CONDA_ENV
+echo "[sbatch] conda activated: CONDA_PREFIX=\${CONDA_PREFIX:-unset}"
 
 # Verify python is available
 which python || { echo "ERROR: python not found after conda activate"; exit 1; }
+python --version
+python -c "import torch; print('[sbatch] torch', torch.__version__, 'cuda', torch.cuda.is_available(), torch.cuda.device_count())" 2>&1
 
 cd "$PROJECT_ROOT"
-$CMD
+echo "[sbatch] cwd=\$(pwd)"
+echo "[sbatch] CMD=$CMD"
+
+# Force unbuffered python (-u) so stdout/stderr flush on every line.
+# \$CMD starts with 'python ...'; rewrite to 'python -u ...' for live logs.
+CMD_UNBUFFERED=\$(echo "$CMD" | sed -E 's|^(\s*)python |\1python -u |')
+echo "[sbatch] CMD_UNBUFFERED=\$CMD_UNBUFFERED"
+
+# Run the command; on failure, echo a marker so the tail of the log makes the exit obvious
+eval "\$CMD_UNBUFFERED"
+RC=\$?
+echo "[sbatch] exit_code=\$RC"
+exit \$RC
 EOF
     echo "Submitted: $JOB_NAME"
 }

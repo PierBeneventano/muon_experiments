@@ -86,18 +86,31 @@ def run(args):
         "max_iters": args.max_iters,
     }
 
-    print(f"[04] Spectral tracking: {args.optimizer} | log_every={args.log_every} | seed={args.seed}")
+    print(f"[04] Spectral tracking: {args.optimizer} | log_every={args.log_every} | seed={args.seed}", flush=True)
+    print(f"[04] CMD: {' '.join(cmd)}", flush=True)
+    print(f"[04] cwd: {os.path.join(PROJECT_ROOT, 'nanoGPT')}", flush=True)
     t0 = time.time()
     result = subprocess.run(cmd, capture_output=True, text=True,
                             cwd=os.path.join(PROJECT_ROOT, "nanoGPT"))
     elapsed = time.time() - t0
     meta["elapsed_s"] = round(elapsed, 1)
     meta["returncode"] = result.returncode
+    print(f"[04] Subprocess done: rc={result.returncode} elapsed={elapsed:.1f}s "
+          f"stdout_lines={len(result.stdout.splitlines())} stderr_lines={len(result.stderr.splitlines())}", flush=True)
 
     with open(os.path.join(out_dir, "stdout.txt"), "w") as f:
         f.write(result.stdout)
     with open(os.path.join(out_dir, "stderr.txt"), "w") as f:
         f.write(result.stderr)
+
+    # Surface errors to SLURM log if subprocess failed — last 80 lines of each stream
+    if result.returncode != 0:
+        print(f"[04] SUBPROCESS FAILED (rc={result.returncode}). Last 80 stderr lines:", flush=True)
+        for line in result.stderr.splitlines()[-80:]:
+            print(f"  [stderr] {line}", flush=True)
+        print(f"[04] Last 40 stdout lines:", flush=True)
+        for line in result.stdout.splitlines()[-40:]:
+            print(f"  [stdout] {line}", flush=True)
 
     # Count spectral snapshots
     spectral_log = os.path.join(out_dir, "spectral", "spectral_log.jsonl")

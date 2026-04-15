@@ -168,17 +168,28 @@ def run(args):
         f"--warmup_iters=100",
         ]
 
-        print(f"[05] Training: {args.optimizer} | seed={args.seed}")
+        print(f"[05] Training: {args.optimizer} | seed={args.seed}", flush=True)
+        print(f"[05] CMD: {' '.join(cmd)}", flush=True)
+        print(f"[05] cwd: {os.path.join(PROJECT_ROOT, 'nanoGPT')}", flush=True)
         t0 = time.time()
         result = subprocess.run(cmd, capture_output=True, text=True,
                                 cwd=os.path.join(PROJECT_ROOT, "nanoGPT"))
         elapsed = time.time() - t0
-        print(f"[05] Training done in {elapsed:.1f}s (rc={result.returncode})")
+        print(f"[05] Training done in {elapsed:.1f}s (rc={result.returncode}) "
+              f"stdout_lines={len(result.stdout.splitlines())} stderr_lines={len(result.stderr.splitlines())}", flush=True)
 
         with open(os.path.join(out_dir, "stdout.txt"), "w") as f:
             f.write(result.stdout)
         with open(os.path.join(out_dir, "stderr.txt"), "w") as f:
             f.write(result.stderr)
+
+        if result.returncode != 0:
+            print(f"[05] SUBPROCESS FAILED (rc={result.returncode}). Last 80 stderr lines:", flush=True)
+            for line in result.stderr.splitlines()[-80:]:
+                print(f"  [stderr] {line}", flush=True)
+            print(f"[05] Last 40 stdout lines:", flush=True)
+            for line in result.stdout.splitlines()[-40:]:
+                print(f"  [stdout] {line}", flush=True)
 
         spectral_log_path = os.path.join(out_dir, "spectral", "spectral_log.jsonl")
 
